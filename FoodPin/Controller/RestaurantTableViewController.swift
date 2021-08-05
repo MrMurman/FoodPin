@@ -9,28 +9,23 @@ import UIKit
 
 class RestaurantTableViewController: UITableViewController {
     
-    struct Restaurant {
-        var restaurantNames = ["Cafe Deadend", "Homei", "Teakha", "Cafe Loisl", "Petite Oyster", "For Kee Restaurant", "Po's Atelier", "Bourke Street Bakery", "Haigh's Chocolate", "Palomino Espresso", "Upstate", "Traif", "Graham Avenue Meats", "Waffle & Wolf", "Five Leaves", "Cafe Lore", "Confessional", "Barrafina", "Donostia", "Royal Oak", "CASK Pub and Kitchen"]
-        var restaurantImages = ["cafedeadend", "homei", "teakha", "cafeloisl", "petiteoyster", "forkee", "posatelier", "bourkestreetbakery", "haigh", "palomino", "upstate", "traif", "graham", "waffleandwolf", "fiveleaves", "cafelore", "confessional", "barrafina", "donostia", "royaloak", "cask"]
-        var restaurantLocations = ["Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Hong Kong", "Sydney", "Sydney", "Sydney", "New York", "New York", "New York", "New York", "New York", "New York", "New York", "London", "London", "London", "London"]
-        var restaurantTypes = ["Coffee & Tea Shop", "Cafe", "Tea House", "Austrian / Causual Drink", "French", "Bakery", "Bakery", "Chocolate", "Cafe", "American / Seafood", "American", "American", "Breakfast & Brunch", "Coffee & Tea", "Coffee & Tea", "Latin American", "Spanish", "Spanish", "Spanish", "British", "Thai"]
-        
-        var restaurantIsFavorite = Array(repeating: false, count: 21)
-    }
-    
-    var restaurant = Restaurant()
+
+    var restaurants = [Restaurant]()
     
     lazy var dataSource = configureDataSource()
     
+    
+    // MARK: -View controller life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        restaurants = Restaurant.all
         tableView.cellLayoutMarginsFollowReadableWidth = true
         
         tableView.dataSource = dataSource
         
-        var snapshot = NSDiffableDataSourceSnapshot<Section, String>()
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Restaurant>()
         snapshot.appendSections([.all])
-        snapshot.appendItems(restaurant.restaurantNames, toSection: .all)
+        snapshot.appendItems(restaurants, toSection: .all)
         
         dataSource.apply(snapshot, animatingDifferences: false)
         
@@ -42,19 +37,19 @@ class RestaurantTableViewController: UITableViewController {
         case all
     }
     
-    func configureDataSource() -> UITableViewDiffableDataSource<Section, String> {
+    func configureDataSource() -> UITableViewDiffableDataSource<Section, Restaurant> {
         
         let cellIdentifier = "datacell"
         
-        let dataSource = UITableViewDiffableDataSource<Section, String>(tableView: tableView, cellProvider: { tableView, indexPath, restaurantName in
+        let dataSource = UITableViewDiffableDataSource<Section, Restaurant>(tableView: tableView, cellProvider: { tableView, indexPath, restaurant in
             let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! RestaurantTableViewCell
             
-            cell.nameLabel.text = restaurantName
-            cell.thumbnailImageView.image = UIImage(named: self.restaurant.restaurantImages[indexPath.row])
-            cell.locationLabel.text = self.restaurant.restaurantLocations[indexPath.row]
-            cell.typeLabel.text = self.restaurant.restaurantTypes[indexPath.row]
+            cell.nameLabel.text = restaurant.name
+            cell.thumbnailImageView.image = UIImage(named: restaurant.image)
+            cell.locationLabel.text = restaurant.location
+            cell.typeLabel.text = restaurant.type
             cell.tintColor = .systemYellow
-            cell.accessoryType = self.restaurant.restaurantIsFavorite[indexPath.row] ? .checkmark : .none
+            //cell.accessoryView = self.restaurant.isFavourite ? .checkmark : .none
             
             return cell
         }
@@ -62,6 +57,8 @@ class RestaurantTableViewController: UITableViewController {
         return dataSource
     }
     
+    
+    // MARK: - UITableViewDelegate Protocol
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         
@@ -105,12 +102,12 @@ class RestaurantTableViewController: UITableViewController {
                 
                 if cell?.accessoryView != .none {
                     cell?.accessoryView = .none
-                    self.restaurant.restaurantIsFavorite[indexPath.row] = false
+                    self.restaurants[indexPath.row].isFavourite = false
                 } else {
                     let heart = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 70))
                     heart.addSubview(UIImageView(image: UIImage(systemName: "heart.fill", compatibleWith: nil)))
                     cell?.accessoryView = heart
-                    self.restaurant.restaurantIsFavorite[indexPath.row] = true
+                    self.restaurants[indexPath.row].isFavourite = true
                 }
                 
             }
