@@ -24,6 +24,7 @@ class RestaurantTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.cellLayoutMarginsFollowReadableWidth = true
         
         tableView.dataSource = dataSource
         
@@ -52,6 +53,7 @@ class RestaurantTableViewController: UITableViewController {
             cell.thumbnailImageView.image = UIImage(named: self.restaurant.restaurantImages[indexPath.row])
             cell.locationLabel.text = self.restaurant.restaurantLocations[indexPath.row]
             cell.typeLabel.text = self.restaurant.restaurantTypes[indexPath.row]
+            cell.tintColor = .systemYellow
             cell.accessoryType = self.restaurant.restaurantIsFavorite[indexPath.row] ? .checkmark : .none
             
             return cell
@@ -61,7 +63,7 @@ class RestaurantTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       
+        
         
         // Create an option menu as an action sheet
         let optionMenu = UIAlertController(title: nil, message: "What do you want to do?", preferredStyle: .actionSheet)
@@ -80,18 +82,52 @@ class RestaurantTableViewController: UITableViewController {
         
         
         // mark as favourite action
-        let favoriteAction = UIAlertAction(title: "Mark as favourite", style: .default) { (action: UIAlertAction) -> Void in
-            let cell = tableView.cellForRow(at: indexPath)
-            cell?.accessoryType = .checkmark
-            cell?.tintColor = .systemYellow
-            self.restaurant.restaurantIsFavorite[indexPath.row] = true
-        }
+        let favoriteAction = {() -> UIAlertAction in
+            //            let title: String = {
+            //                if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
+            //                    return "Remove from favourite"
+            //                } else {
+            //                    return "Add to favourite"
+            //                }
+            //
+            //            }()
+            
+            return UIAlertAction(title: {
+                if tableView.cellForRow(at: indexPath)?.accessoryView != .none {
+                    return "Remove from favourite"
+                } else {
+                    return "Add to favourite"
+                }
+                
+            }(),
+                                 style: .default) { (action: UIAlertAction) -> Void in
+                let cell = tableView.cellForRow(at: indexPath)
+                
+                if cell?.accessoryView != .none {
+                    cell?.accessoryView = .none
+                    self.restaurant.restaurantIsFavorite[indexPath.row] = false
+                } else {
+                    let heart = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 70))
+                    heart.addSubview(UIImageView(image: UIImage(systemName: "heart.fill", compatibleWith: nil)))
+                    cell?.accessoryView = heart
+                    self.restaurant.restaurantIsFavorite[indexPath.row] = true
+                }
+                
+            }
+        }()
         
         optionMenu.addAction(cancelAction)
         optionMenu.addAction(reserveAction)
         optionMenu.addAction(favoriteAction)
         
         present(optionMenu, animated: true, completion: nil)
+        
+        if let popoverController = optionMenu.popoverPresentationController {
+            if let cell = tableView.cellForRow(at: indexPath) {
+                popoverController.sourceView = cell
+                popoverController.sourceRect = cell.bounds
+            }
+        }
         
         tableView.deselectRow(at: indexPath, animated: false)
     }
