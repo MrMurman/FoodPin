@@ -18,6 +18,7 @@ class RestaurantTableViewController: UITableViewController {
     // MARK: -View controller life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.prefersLargeTitles = true
         restaurants = Restaurant.all
         tableView.cellLayoutMarginsFollowReadableWidth = true
         
@@ -56,75 +57,75 @@ class RestaurantTableViewController: UITableViewController {
     
     
     // MARK: - UITableViewDelegate Protocol
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        
-        // Create an option menu as an action sheet
-        let optionMenu = UIAlertController(title: nil, message: "What do you want to do?", preferredStyle: .actionSheet)
-        
-        // add actions to the menu
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        
-        // add "reserve a table" action
-        let reserveActionHandler = {(action: UIAlertAction!) -> Void in
-            let alertMessage = UIAlertController(title: "Not available yet", message: "Sorry, this feature is not available yet. Please retry later", preferredStyle: .alert)
-            alertMessage.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            self.present(alertMessage, animated: true, completion: nil)
-        }
-        
-        let reserveAction = UIAlertAction(title: "Reserve a table", style: .default, handler: reserveActionHandler)
-        
-        
-        // mark as favourite action
-        let favoriteAction = {() -> UIAlertAction in
-            //            let title: String = {
-            //                if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            //                    return "Remove from favourite"
-            //                } else {
-            //                    return "Add to favourite"
-            //                }
-            //
-            //            }()
-            
-            return UIAlertAction(title: {
-                if tableView.cellForRow(at: indexPath)?.accessoryView != .none {
-                    return "Remove from favourite"
-                } else {
-                    return "Add to favourite"
-                }
-                
-            }(),
-                                 style: .default) { (action: UIAlertAction) -> Void in
-                let cell = tableView.cellForRow(at: indexPath)
-                
-                if cell?.accessoryView != .none {
-                    cell?.accessoryView = .none
-                    self.restaurants[indexPath.row].isFavourite = false
-                } else {
-                    let heart = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 70))
-                    heart.addSubview(UIImageView(image: UIImage(systemName: "heart.fill", compatibleWith: nil)))
-                    cell?.accessoryView = heart
-                    self.restaurants[indexPath.row].isFavourite = true
-                }
-                
-            }
-        }()
-        
-        optionMenu.addAction(cancelAction)
-        optionMenu.addAction(reserveAction)
-        optionMenu.addAction(favoriteAction)
-        
-        present(optionMenu, animated: true, completion: nil)
-        
-        if let popoverController = optionMenu.popoverPresentationController {
-            if let cell = tableView.cellForRow(at: indexPath) {
-                popoverController.sourceView = cell
-                popoverController.sourceRect = cell.bounds
-            }
-        }
-        
-        tableView.deselectRow(at: indexPath, animated: false)
-    }
+//    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//
+//
+//        // Create an option menu as an action sheet
+//        let optionMenu = UIAlertController(title: nil, message: "What do you want to do?", preferredStyle: .actionSheet)
+//
+//        // add actions to the menu
+//        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+//
+//        // add "reserve a table" action
+//        let reserveActionHandler = {(action: UIAlertAction!) -> Void in
+//            let alertMessage = UIAlertController(title: "Not available yet", message: "Sorry, this feature is not available yet. Please retry later", preferredStyle: .alert)
+//            alertMessage.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+//            self.present(alertMessage, animated: true, completion: nil)
+//        }
+//
+//        let reserveAction = UIAlertAction(title: "Reserve a table", style: .default, handler: reserveActionHandler)
+//
+//
+//        // mark as favourite action
+//        let favoriteAction = {() -> UIAlertAction in
+//            //            let title: String = {
+//            //                if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
+//            //                    return "Remove from favourite"
+//            //                } else {
+//            //                    return "Add to favourite"
+//            //                }
+//            //
+//            //            }()
+//
+//            return UIAlertAction(title: {
+//                if tableView.cellForRow(at: indexPath)?.accessoryView != .none {
+//                    return "Remove from favourite"
+//                } else {
+//                    return "Add to favourite"
+//                }
+//
+//            }(),
+//                                 style: .default) { (action: UIAlertAction) -> Void in
+//                let cell = tableView.cellForRow(at: indexPath)
+//
+//                if cell?.accessoryView != .none {
+//                    cell?.accessoryView = .none
+//                    self.restaurants[indexPath.row].isFavourite = false
+//                } else {
+//                    let heart = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 70))
+//                    heart.addSubview(UIImageView(image: UIImage(systemName: "heart.fill", compatibleWith: nil)))
+//                    cell?.accessoryView = heart
+//                    self.restaurants[indexPath.row].isFavourite = true
+//                }
+//
+//            }
+//        }()
+//
+//        optionMenu.addAction(cancelAction)
+//        optionMenu.addAction(reserveAction)
+//        optionMenu.addAction(favoriteAction)
+//
+//        present(optionMenu, animated: true, completion: nil)
+//
+//        if let popoverController = optionMenu.popoverPresentationController {
+//            if let cell = tableView.cellForRow(at: indexPath) {
+//                popoverController.sourceView = cell
+//                popoverController.sourceRect = cell.bounds
+//            }
+//        }
+//
+//        tableView.deselectRow(at: indexPath, animated: false)
+//    }
     
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         // get the selected restaurant
@@ -214,5 +215,16 @@ class RestaurantTableViewController: UITableViewController {
         
         return swipeConfiguration
     }
+ 
     
+    
+    // MARK: - Segue stuff
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "showRestaurantDetail" {
+            if let indexPath = tableView.indexPathForSelectedRow {
+                let destinationController = segue.destination as! RestaurantDetailViewController
+                destinationController.passedRestaurant = self.restaurants[indexPath.row]
+            }
+        }
+    }
 }
